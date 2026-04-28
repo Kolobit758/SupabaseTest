@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8" />
@@ -707,7 +707,7 @@
         gameState.score = 0;
         gameState.health = 100;
         game = { bullets: [], enemies: [], powerups: [], explosions: [], particles: [], keys: {} };
-        playerStats = { damage: 5, fireRate: 0.05, health: 100, speed: 5, bulletSize: 4 };
+        playerStats = { damage: 5, fireRate: 0.1, health: 100, speed: 5, bulletSize: 4 };
         activePowerups = { doubleShot: 0, rapidFire: 0, shield: 0, slowTime: 0, magneticField: 0 };
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         updateUI();

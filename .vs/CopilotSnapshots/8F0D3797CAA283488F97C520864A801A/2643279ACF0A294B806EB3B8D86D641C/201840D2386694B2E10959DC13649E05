@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8" />
@@ -378,7 +378,7 @@
 
       let playerStats = {
         damage: 5,
-        fireRate: 0.05,
+        fireRate: 0.1,
         health: 100,
         speed: 5,
         bulletSize: 4
@@ -559,13 +559,13 @@
 
       // ==================== EFFECTS ====================
       function createExplosion(x, y) {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 8; i++) {
           game.particles.push({
             x, y,
-            vx: Math.cos(i * Math.PI / 3) * 2,
-            vy: Math.sin(i * Math.PI / 3) * 2,
-            life: 15,
-            size: 4
+            vx: Math.cos(i * Math.PI / 4) * 3,
+            vy: Math.sin(i * Math.PI / 4) * 3,
+            life: 30,
+            size: 5
           });
         }
       }
@@ -633,7 +633,7 @@
         // Particles
         ctx.fillStyle = '#e8ff47';
         game.particles.forEach(p => {
-          ctx.globalAlpha = Math.max(0, p.life / 15);
+          ctx.globalAlpha = p.life / 30;
           ctx.fillRect(p.x, p.y, p.size, p.size);
         });
         ctx.globalAlpha = 1;
@@ -707,7 +707,7 @@
         gameState.score = 0;
         gameState.health = 100;
         game = { bullets: [], enemies: [], powerups: [], explosions: [], particles: [], keys: {} };
-        playerStats = { damage: 5, fireRate: 0.05, health: 100, speed: 5, bulletSize: 4 };
+        playerStats = { damage: 5, fireRate: 0.1, health: 100, speed: 5, bulletSize: 4 };
         activePowerups = { doubleShot: 0, rapidFire: 0, shield: 0, slowTime: 0, magneticField: 0 };
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         updateUI();

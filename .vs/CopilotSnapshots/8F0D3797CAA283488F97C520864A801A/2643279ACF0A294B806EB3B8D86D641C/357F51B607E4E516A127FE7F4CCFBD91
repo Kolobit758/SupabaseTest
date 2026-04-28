@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8" />
@@ -378,7 +378,7 @@
 
       let playerStats = {
         damage: 5,
-        fireRate: 0.05,
+        fireRate: 0.1,
         health: 100,
         speed: 5,
         bulletSize: 4
@@ -559,13 +559,13 @@
 
       // ==================== EFFECTS ====================
       function createExplosion(x, y) {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 8; i++) {
           game.particles.push({
             x, y,
-            vx: Math.cos(i * Math.PI / 3) * 2,
-            vy: Math.sin(i * Math.PI / 3) * 2,
-            life: 15,
-            size: 4
+            vx: Math.cos(i * Math.PI / 4) * 3,
+            vy: Math.sin(i * Math.PI / 4) * 3,
+            life: 30,
+            size: 5
           });
         }
       }
@@ -611,7 +611,7 @@
         game.enemies.forEach(enemy => {
           ctx.fillStyle = enemy.type === 'elite' ? '#f87171' : '#60a5fa';
           ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-
+          
           // Health bar
           ctx.fillStyle = '#22c55e';
           ctx.fillRect(enemy.x, enemy.y - 8, (enemy.health / enemy.maxHealth) * enemy.width, 4);
@@ -633,7 +633,7 @@
         // Particles
         ctx.fillStyle = '#e8ff47';
         game.particles.forEach(p => {
-          ctx.globalAlpha = Math.max(0, p.life / 15);
+          ctx.globalAlpha = p.life / 30;
           ctx.fillRect(p.x, p.y, p.size, p.size);
         });
         ctx.globalAlpha = 1;
@@ -645,13 +645,6 @@
         ctx.fillText(`Wave: ${gameState.wave}`, 20, 30);
         ctx.fillText(`Score: ${gameState.score}`, 20, 55);
         ctx.fillText(`Health: ${Math.max(0, gameState.health)}%`, 20, 80);
-
-        // Difficulty and survival time
-        ctx.font = 'bold 12px DM Sans';
-        ctx.fillStyle = '#a78bfa';
-        const survivalSeconds = Math.floor(gameState.survivalTime / 60);
-        ctx.fillText(`Difficulty: ${gameState.wave}⭐`, 20, 100);
-        ctx.fillText(`Survive: ${survivalSeconds}s`, 20, 115);
       }
 
       // ==================== GAME LOOP ====================
@@ -707,7 +700,7 @@
         gameState.score = 0;
         gameState.health = 100;
         game = { bullets: [], enemies: [], powerups: [], explosions: [], particles: [], keys: {} };
-        playerStats = { damage: 5, fireRate: 0.05, health: 100, speed: 5, bulletSize: 4 };
+        playerStats = { damage: 5, fireRate: 0.1, health: 100, speed: 5, bulletSize: 4 };
         activePowerups = { doubleShot: 0, rapidFire: 0, shield: 0, slowTime: 0, magneticField: 0 };
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         updateUI();
@@ -728,14 +721,6 @@
         const modal = document.getElementById('waveClearModal');
         const optionsDiv = document.getElementById('upgradeOptions');
         optionsDiv.innerHTML = '';
-
-        // Auto-apply difficulty boost every 5 waves
-        if (gameState.wave % 5 === 0) {
-          gameState.multiplierLevel = Math.floor(gameState.wave / 5);
-          gameState.maxHealth += 15;
-          gameState.health = gameState.maxHealth;
-          playerStats.damage *= 1.15;
-        }
 
         const selectedUpgrades = [];
         for (let i = 0; i < 3; i++) {
@@ -774,11 +759,8 @@
 
       // ==================== GAME OVER ====================
       function showGameOverModal() {
-        const survivalSeconds = Math.floor(gameState.survivalTime / 60);
         document.getElementById('finalWave').textContent = gameState.wave;
         document.getElementById('finalScore').textContent = gameState.score;
-        const scoreDiv = document.querySelector('#gameOverModal .score');
-        scoreDiv.innerHTML = `Wave <span id="finalWave">${gameState.wave}</span> - Score: <span id="finalScore">${gameState.score}</span><br><small style="font-size: 14px; color: var(--muted);">⏱️ Survived ${survivalSeconds}s | 👾 Kills: ${gameState.totalKills}</small>`;
         document.getElementById('gameOverModal').classList.add('active');
       }
 
@@ -791,8 +773,6 @@
           await db.from('plane_shooter_scores').insert({
             wave: gameState.wave,
             score: gameState.score,
-            survivalTime: gameState.survivalTime,
-            totalKills: gameState.totalKills,
             created_at: new Date().toISOString()
           });
         } catch (err) {
@@ -805,7 +785,6 @@
 
       // ==================== UI UPDATE ====================
       function updateUI() {
-        const survivalSeconds = Math.floor(gameState.survivalTime / 60);
         document.getElementById('waveDisplay').textContent = gameState.wave;
         document.getElementById('scoreDisplay').textContent = gameState.score;
         document.getElementById('healthDisplay').textContent = Math.max(0, Math.round(gameState.health));
@@ -828,30 +807,21 @@
         if (powerupsList.children.length === 0) {
           powerupsList.innerHTML = '<div style="grid-column: 1/-1; color: var(--muted); font-size: 12px;">None active</div>';
         }
-
-        // Show survival time in status
-        const statusText = document.getElementById('statusText');
-        if (gameState.running) {
-          statusText.textContent = `🎯 Wave ${gameState.wave} | ⏱️ ${survivalSeconds}s | 👾 ${game.enemies.length} enemies`;
-        } else {
-          statusText.textContent = 'Ready to fight!';
-        }
       }
 
       async function loadLeaderboard() {
         try {
           const { data } = await db
             .from('plane_shooter_scores')
-            .select('score, wave, survivalTime, totalKills, created_at')
+            .select('score, wave, created_at')
             .order('score', { ascending: false })
             .limit(5);
 
           const lb = document.getElementById('leaderboard');
           if (data && data.length > 0) {
-            lb.innerHTML = data.map((entry, i) => {
-              const survivalSec = Math.floor(entry.survivalTime / 60);
-              return `<div class="lb-entry"><span class="lb-name">#${i+1} W${entry.wave}</span><span class="lb-score">${entry.score} (${survivalSec}s)</span></div>`;
-            }).join('');
+            lb.innerHTML = data.map((entry, i) => 
+              `<div class="lb-entry"><span class="lb-name">${i+1}. W${entry.wave}</span><span class="lb-score">${entry.score}</span></div>`
+            ).join('');
           } else {
             lb.innerHTML = '<div style="color: var(--muted);">No scores yet</div>';
           }
