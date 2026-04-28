@@ -4,29 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SUPER SNAKE - Extreme Challenge</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
         --bg: #0d0d0d;
         --surface: #161616;
         --surface2: #1f1f1f;
-        --border: rgba(255,255,255,0.07);
+        --border: rgba(255, 255, 255, 0.07);
         --accent: #e8ff47;
         --text: #f0f0f0;
-        --muted: rgba(255,255,255,0.35);
+        --muted: rgba(255, 255, 255, 0.35);
         --snake: #00ff88;
         --food: #ff1744;
         --power: #ffeb3b;
         --poison: #9c27b0;
         --wall: #424242;
       }
-      * { margin:0; padding:0; box-sizing:border-box; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
       body {
         background: var(--bg);
         color: var(--text);
-        font-family: 'DM Sans', sans-serif;
+        font-family: "DM Sans", sans-serif;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -36,9 +46,13 @@
         background: var(--surface) !important;
         border-bottom: 1px solid var(--border);
         padding: 12px 24px;
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: "Bebas Neue", sans-serif;
       }
-      .navbar-brand { color: var(--accent) !important; font-size: 24px; letter-spacing: 2px; }
+      .navbar-brand {
+        color: var(--accent) !important;
+        font-size: 24px;
+        letter-spacing: 2px;
+      }
 
       .container-game {
         display: grid;
@@ -60,11 +74,13 @@
         padding: 12px 16px;
         background: var(--surface2);
         border-bottom: 1px solid var(--border);
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: "Bebas Neue", sans-serif;
         color: var(--accent);
         font-size: 14px;
       }
-      .panel-body { padding: 16px; }
+      .panel-body {
+        padding: 16px;
+      }
 
       /* Game Canvas */
       .game-container {
@@ -78,7 +94,7 @@
       #gameCanvas {
         background: #000;
         border: 3px solid var(--accent);
-        box-shadow: 0 0 30px rgba(232,255,71,0.3);
+        box-shadow: 0 0 30px rgba(232, 255, 71, 0.3);
         max-width: 100%;
         display: block;
         margin: 0 auto;
@@ -104,7 +120,7 @@
         font-size: 32px;
         font-weight: bold;
         color: var(--accent);
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: "Bebas Neue", sans-serif;
       }
 
       .label {
@@ -115,14 +131,31 @@
 
       /* Controls */
       .btn-custom {
-        width: 100%; padding: 10px; border-radius: 6px; border: none; 
-        font-weight: bold; margin-bottom: 8px; cursor: pointer;
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: none;
+        font-weight: bold;
+        margin-bottom: 8px;
+        cursor: pointer;
         transition: all 0.2s;
       }
-      .btn-primary { background: var(--accent); color: black; }
-      .btn-primary:hover { background: #ffff00; transform: scale(1.05); }
-      .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-      .btn-outline:hover { background: rgba(232,255,71,0.1); }
+      .btn-primary {
+        background: var(--accent);
+        color: black;
+      }
+      .btn-primary:hover {
+        background: #ffff00;
+        transform: scale(1.05);
+      }
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+      .btn-outline:hover {
+        background: rgba(232, 255, 71, 0.1);
+      }
 
       .difficulty-grid {
         display: grid;
@@ -132,14 +165,21 @@
       }
 
       .diff-btn {
-        padding: 8px; border-radius: 6px; border: 1px solid var(--border);
-        background: transparent; color: var(--text); font-size: 12px; cursor: pointer;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text);
+        font-size: 12px;
+        cursor: pointer;
         transition: all 0.2s;
       }
 
       .diff-btn.active {
-        background: var(--accent); color: black; font-weight: bold;
-        box-shadow: 0 0 15px rgba(232,255,71,0.5);
+        background: var(--accent);
+        color: black;
+        font-weight: bold;
+        box-shadow: 0 0 15px rgba(232, 255, 71, 0.5);
       }
 
       .stat-item {
@@ -149,7 +189,9 @@
         border-bottom: 1px solid var(--border);
         font-size: 13px;
       }
-      .stat-item:last-child { border-bottom: none; }
+      .stat-item:last-child {
+        border-bottom: none;
+      }
 
       .value {
         color: var(--accent);
@@ -177,8 +219,14 @@
         border-bottom: 1px solid var(--border);
       }
 
-      .rank { color: var(--accent); font-weight: bold; min-width: 25px; }
-      .score-lb { color: var(--accent); }
+      .rank {
+        color: var(--accent);
+        font-weight: bold;
+        min-width: 25px;
+      }
+      .score-lb {
+        color: var(--accent);
+      }
 
       .legend {
         font-size: 11px;
@@ -202,8 +250,11 @@
 
       .modal-overlay {
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.8);
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
         display: none;
         align-items: center;
         justify-content: center;
@@ -221,11 +272,11 @@
         padding: 30px;
         text-align: center;
         max-width: 400px;
-        box-shadow: 0 0 50px rgba(232,255,71,0.3);
+        box-shadow: 0 0 50px rgba(232, 255, 71, 0.3);
       }
 
       .modal-title {
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: "Bebas Neue", sans-serif;
         font-size: 28px;
         color: var(--accent);
         margin-bottom: 15px;
@@ -246,9 +297,13 @@
     </style>
   </head>
   <body>
-    <nav class="navbar">
-      <div class="container-fluid">
-        <span class="navbar-brand">🐍 SUPER SNAKE EXTREME</span>
+    <nav class="navbar navbar-dark bg-dark px-3 mb-3 rounded">
+      <a class="navbar-brand text-warning" href="index.html">🎓 Students</a>
+      <div>
+        <a class="btn btn-outline-light btn-sm" href="index.html">Students</a>
+        <!-- <a class="btn btn-warning btn-sm" href="chess.html">♟ Chess</a> -->
+        <a class="btn btn-outline-light btn-sm" href="Fourth.html">Fourth</a>
+        <a class="btn btn-outline-light btn-sm" href="#">SNAKE</a>
       </div>
     </nav>
 
@@ -260,13 +315,25 @@
           <div class="panel-body">
             <div class="difficulty-grid">
               <button class="diff-btn" onclick="setDifficulty(1)">EASY</button>
-              <button class="diff-btn" onclick="setDifficulty(2)">NORMAL</button>
-              <button class="diff-btn active" onclick="setDifficulty(3)">HARD</button>
-              <button class="diff-btn" onclick="setDifficulty(4)">EXTREME</button>
+              <button class="diff-btn" onclick="setDifficulty(2)">
+                NORMAL
+              </button>
+              <button class="diff-btn active" onclick="setDifficulty(3)">
+                HARD
+              </button>
+              <button class="diff-btn" onclick="setDifficulty(4)">
+                EXTREME
+              </button>
             </div>
-            <button class="btn-custom btn-primary" onclick="startGame()">▶ START GAME</button>
-            <button class="btn-custom btn-outline" onclick="pauseGame()">⏸ PAUSE</button>
-            <button class="btn-custom btn-outline" onclick="resetGame()">🔄 RESET</button>
+            <button class="btn-custom btn-primary" onclick="startGame()">
+              ▶ START GAME
+            </button>
+            <button class="btn-custom btn-outline" onclick="pauseGame()">
+              ⏸ PAUSE
+            </button>
+            <button class="btn-custom btn-outline" onclick="resetGame()">
+              🔄 RESET
+            </button>
           </div>
         </div>
 
@@ -289,7 +356,7 @@
               <span>Time:</span>
               <span class="value" id="statsTime">0s</span>
             </div>
-            <hr style="border-color: var(--border); margin: 8px 0;">
+            <hr style="border-color: var(--border); margin: 8px 0" />
             <div class="stat-item">
               <span>High Score:</span>
               <span class="value" id="statsHighScore">0</span>
@@ -347,15 +414,17 @@
           <div class="panel-header">🏆 LEADERBOARD</div>
           <div class="panel-body">
             <div class="leaderboard" id="leaderboard">
-              <div style="color: var(--muted); text-align: center;">Loading...</div>
+              <div style="color: var(--muted); text-align: center">
+                Loading...
+              </div>
             </div>
           </div>
         </div>
 
         <div class="panel">
           <div class="panel-header">💡 TIPS</div>
-          <div class="panel-body" style="font-size: 12px; line-height: 1.6;">
-            <ul style="padding-left: 15px; margin-bottom: 0;">
+          <div class="panel-body" style="font-size: 12px; line-height: 1.6">
+            <ul style="padding-left: 15px; margin-bottom: 0">
               <li>🔴 Eat red food to grow</li>
               <li>⭐ Golden food = speed boost!</li>
               <li>☠️ Purple poison = -5 length</li>
@@ -372,22 +441,30 @@
       <div class="modal-box">
         <div class="modal-title" id="gameOverTitle">GAME OVER!</div>
         <div class="modal-score" id="gameOverScore">0</div>
-        <div style="color: var(--muted); margin-bottom: 20px;" id="gameOverStats"></div>
-        <button class="btn-custom btn-primary" onclick="startGame()">Play Again</button>
-        <button class="btn-custom btn-outline" onclick="saveScore()">💾 Save Score</button>
+        <div
+          style="color: var(--muted); margin-bottom: 20px"
+          id="gameOverStats"
+        ></div>
+        <button class="btn-custom btn-primary" onclick="startGame()">
+          Play Again
+        </button>
+        <button class="btn-custom btn-outline" onclick="saveScore()">
+          💾 Save Score
+        </button>
       </div>
     </div>
 
     <script>
       // SUPABASE CONFIG
       const SUPABASE_URL = "https://mhmchtcteweifnjegdgw.supabase.co";
-      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1obWNodGN0ZXdlaWZuamVnZGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNDgzMjAsImV4cCI6MjA5MjkyNDMyMH0.7V0ZuFl2ESRkgEQnB1CX3_AZYSwkXwXl10vcVNNCDpQ";
+      const SUPABASE_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1obWNodGN0ZXdlaWZuamVnZGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNDgzMjAsImV4cCI6MjA5MjkyNDMyMH0.7V0ZuFl2ESRkgEQnB1CX3_AZYSwkXwXl10vcVNNCDpQ";
       const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
       // CANVAS & GAME
-      const canvas = document.getElementById('gameCanvas');
-      const ctx = canvas.getContext('2d');
-      
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
       const gridSize = 30;
       const cols = canvas.width / gridSize;
       const rows = canvas.height / gridSize;
@@ -400,7 +477,7 @@
       let gameActive = false;
       let gamePaused = false;
       let score = 0;
-      let highScore = localStorage.getItem('snakeHighScore') || 0;
+      let highScore = localStorage.getItem("snakeHighScore") || 0;
       let foodEaten = 0;
       let level = 1;
       let gameSpeed = 100;
@@ -427,8 +504,8 @@
 
         spawnFood();
         spawnFood();
-        document.getElementById('scoreDisplay').textContent = '0';
-        document.getElementById('levelDisplay').textContent = '1';
+        document.getElementById("scoreDisplay").textContent = "0";
+        document.getElementById("levelDisplay").textContent = "1";
 
         clearInterval(gameLoopId);
         gameLoopId = setInterval(update, gameSpeed);
@@ -437,7 +514,8 @@
         setInterval(() => {
           if (gameActive && !gamePaused) {
             gameElapsedTime = Math.floor((Date.now() - gameStartTime) / 1000);
-            document.getElementById('statsTime').textContent = gameElapsedTime + 's';
+            document.getElementById("statsTime").textContent =
+              gameElapsedTime + "s";
           }
         }, 100);
       }
@@ -448,20 +526,23 @@
         direction = nextDirection;
 
         // Move snake
-        const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+        const head = {
+          x: snake[0].x + direction.x,
+          y: snake[0].y + direction.y,
+        };
 
         // Wrap around
         head.x = (head.x + cols) % cols;
         head.y = (head.y + rows) % rows;
 
         // Check collision with self
-        if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
+        if (snake.some((seg) => seg.x === head.x && seg.y === head.y)) {
           endGame();
           return;
         }
 
         // Check collision with obstacles
-        if (obstacles.some(obs => obs.x === head.x && obs.y === head.y)) {
+        if (obstacles.some((obs) => obs.x === head.x && obs.y === head.y)) {
           endGame();
           return;
         }
@@ -473,12 +554,12 @@
         for (let i = 0; i < food.length; i++) {
           if (food[i].x === head.x && food[i].y === head.y) {
             score += food[i].points || 10;
-            foodEaten += food[i].type === 'food' ? 1 : 0;
-            
+            foodEaten += food[i].type === "food" ? 1 : 0;
+
             // Special effects
-            if (food[i].type === 'poison') {
+            if (food[i].type === "poison") {
               snake.splice(0, Math.min(5, snake.length - 1));
-            } else if (food[i].type === 'speedup') {
+            } else if (food[i].type === "speedup") {
               gameSpeed = Math.max(40, gameSpeed - 15);
               clearInterval(gameLoopId);
               gameLoopId = setInterval(update, gameSpeed);
@@ -499,7 +580,7 @@
         const newLevel = Math.floor(foodEaten / 5) + 1;
         if (newLevel !== level) {
           level = newLevel;
-          document.getElementById('levelDisplay').textContent = level;
+          document.getElementById("levelDisplay").textContent = level;
           if (level % 5 === 0) spawnObstacles();
         }
 
@@ -513,21 +594,24 @@
           valid = true;
           x = Math.floor(Math.random() * cols);
           y = Math.floor(Math.random() * rows);
-          if (snake.some(seg => seg.x === x && seg.y === y)) valid = false;
-          if (obstacles.some(obs => obs.x === x && obs.y === y)) valid = false;
+          if (snake.some((seg) => seg.x === x && seg.y === y)) valid = false;
+          if (obstacles.some((obs) => obs.x === x && obs.y === y))
+            valid = false;
         } while (!valid);
 
         const rand = Math.random();
-        let type = 'food', points = 10, color = 'var(--food)';
-        
+        let type = "food",
+          points = 10,
+          color = "var(--food)";
+
         if (rand < 0.1) {
-          type = 'poison';
+          type = "poison";
           points = -50;
-          color = 'var(--poison)';
+          color = "var(--poison)";
         } else if (rand < 0.2) {
-          type = 'speedup';
+          type = "speedup";
           points = 20;
-          color = 'var(--power)';
+          color = "var(--power)";
         }
 
         food.push({ x, y, type, points, color });
@@ -542,9 +626,10 @@
             valid = true;
             x = Math.floor(Math.random() * cols);
             y = Math.floor(Math.random() * rows);
-            if (snake.some(seg => seg.x === x && seg.y === y)) valid = false;
-            if (food.some(f => f.x === x && f.y === y)) valid = false;
-            if (obstacles.some(obs => obs.x === x && obs.y === y)) valid = false;
+            if (snake.some((seg) => seg.x === x && seg.y === y)) valid = false;
+            if (food.some((f) => f.x === x && f.y === y)) valid = false;
+            if (obstacles.some((obs) => obs.x === x && obs.y === y))
+              valid = false;
           } while (!valid);
           obstacles.push({ x, y });
         }
@@ -552,11 +637,11 @@
 
       function draw() {
         // Clear
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Grid
-        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ctx.strokeStyle = "rgba(255,255,255,0.05)";
         ctx.lineWidth = 0.5;
         for (let i = 0; i <= cols; i++) {
           ctx.beginPath();
@@ -572,49 +657,85 @@
         }
 
         // Draw obstacles
-        ctx.fillStyle = '#424242';
+        ctx.fillStyle = "#424242";
         for (let obs of obstacles) {
-          ctx.fillRect(obs.x * gridSize, obs.y * gridSize, gridSize - 2, gridSize - 2);
+          ctx.fillRect(
+            obs.x * gridSize,
+            obs.y * gridSize,
+            gridSize - 2,
+            gridSize - 2,
+          );
         }
 
         // Draw food
         for (let f of food) {
-          ctx.fillStyle = f.type === 'poison' ? '#9c27b0' : f.type === 'speedup' ? '#ffeb3b' : '#ff1744';
-          ctx.fillRect(f.x * gridSize + 2, f.y * gridSize + 2, gridSize - 4, gridSize - 4);
+          ctx.fillStyle =
+            f.type === "poison"
+              ? "#9c27b0"
+              : f.type === "speedup"
+                ? "#ffeb3b"
+                : "#ff1744";
+          ctx.fillRect(
+            f.x * gridSize + 2,
+            f.y * gridSize + 2,
+            gridSize - 4,
+            gridSize - 4,
+          );
         }
 
         // Draw snake
         for (let i = 0; i < snake.length; i++) {
           const seg = snake[i];
-          ctx.fillStyle = i === 0 ? '#00ff88' : '#00dd77';
-          ctx.fillRect(seg.x * gridSize + 1, seg.y * gridSize + 1, gridSize - 2, gridSize - 2);
-          
+          ctx.fillStyle = i === 0 ? "#00ff88" : "#00dd77";
+          ctx.fillRect(
+            seg.x * gridSize + 1,
+            seg.y * gridSize + 1,
+            gridSize - 2,
+            gridSize - 2,
+          );
+
           // Eyes on head
           if (i === 0) {
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = "#000";
             const eyeSize = 3;
-            ctx.fillRect(seg.x * gridSize + 5, seg.y * gridSize + 5, eyeSize, eyeSize);
-            ctx.fillRect(seg.x * gridSize + gridSize - 8, seg.y * gridSize + 5, eyeSize, eyeSize);
+            ctx.fillRect(
+              seg.x * gridSize + 5,
+              seg.y * gridSize + 5,
+              eyeSize,
+              eyeSize,
+            );
+            ctx.fillRect(
+              seg.x * gridSize + gridSize - 8,
+              seg.y * gridSize + 5,
+              eyeSize,
+              eyeSize,
+            );
           }
         }
       }
 
       function updateUI() {
-        document.getElementById('scoreDisplay').textContent = score;
-        document.getElementById('statsLength').textContent = snake.length;
-        document.getElementById('statsSpeed').textContent = (difficulty).toFixed(1) + 'x';
-        document.getElementById('statsFoodEaten').textContent = foodEaten;
-        document.getElementById('statsHighScore').textContent = Math.max(score, highScore);
+        document.getElementById("scoreDisplay").textContent = score;
+        document.getElementById("statsLength").textContent = snake.length;
+        document.getElementById("statsSpeed").textContent =
+          difficulty.toFixed(1) + "x";
+        document.getElementById("statsFoodEaten").textContent = foodEaten;
+        document.getElementById("statsHighScore").textContent = Math.max(
+          score,
+          highScore,
+        );
       }
 
       function setDifficulty(d) {
         difficulty = d;
-        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        document
+          .querySelectorAll(".diff-btn")
+          .forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
       }
 
       function startGame() {
-        document.getElementById('gameOverModal').classList.remove('show');
+        document.getElementById("gameOverModal").classList.remove("show");
         if (!gameActive) initGame();
         gamePaused = false;
       }
@@ -622,7 +743,7 @@
       function pauseGame() {
         if (!gameActive) return;
         gamePaused = !gamePaused;
-        event.target.textContent = gamePaused ? '▶ RESUME' : '⏸ PAUSE';
+        event.target.textContent = gamePaused ? "▶ RESUME" : "⏸ PAUSE";
       }
 
       function resetGame() {
@@ -636,47 +757,73 @@
         clearInterval(gameLoopId);
         if (score > highScore) {
           highScore = score;
-          localStorage.setItem('snakeHighScore', highScore);
+          localStorage.setItem("snakeHighScore", highScore);
         }
-        document.getElementById('gameOverTitle').textContent = score > 500 ? '🔥 INCREDIBLE!' : score > 200 ? '👏 GREAT JOB!' : 'GAME OVER';
-        document.getElementById('gameOverScore').textContent = score;
-        document.getElementById('gameOverStats').textContent = `Length: ${snake.length} | Level: ${level} | Time: ${gameElapsedTime}s`;
-        document.getElementById('gameOverModal').classList.add('show');
+        document.getElementById("gameOverTitle").textContent =
+          score > 500
+            ? "🔥 INCREDIBLE!"
+            : score > 200
+              ? "👏 GREAT JOB!"
+              : "GAME OVER";
+        document.getElementById("gameOverScore").textContent = score;
+        document.getElementById("gameOverStats").textContent =
+          `Length: ${snake.length} | Level: ${level} | Time: ${gameElapsedTime}s`;
+        document.getElementById("gameOverModal").classList.add("show");
         loadLeaderboard();
       }
 
       async function saveScore() {
-        const { error } = await db.from('snake_scores').insert({
-          score, length: snake.length, level, time: gameElapsedTime, difficulty,
-          created_at: new Date()
+        const { error } = await db.from("snake_scores").insert({
+          score,
+          length: snake.length,
+          level,
+          time: gameElapsedTime,
+          difficulty,
+          created_at: new Date(),
         });
-        if (!error) alert('✓ Score saved!');
+        if (!error) alert("✓ Score saved!");
       }
 
       async function loadLeaderboard() {
-        const { data } = await db.from('snake_scores').select('score, length, level, difficulty')
-          .order('score', { ascending: false }).limit(10);
-        
+        const { data } = await db
+          .from("snake_scores")
+          .select("score, length, level, difficulty")
+          .order("score", { ascending: false })
+          .limit(10);
+
         if (data) {
-          const html = data.map((item, i) => 
-            `<div class="lb-item"><span class="rank">#${i+1}</span><span>${item.score} pts (Lvl${item.level})</span><span class="score-lb">${item.length}len</span></div>`
-          ).join('');
-          document.getElementById('leaderboard').innerHTML = html || '<div style="text-align:center; color: var(--muted);">No scores yet</div>';
+          const html = data
+            .map(
+              (item, i) =>
+                `<div class="lb-item"><span class="rank">#${i + 1}</span><span>${item.score} pts (Lvl${item.level})</span><span class="score-lb">${item.length}len</span></div>`,
+            )
+            .join("");
+          document.getElementById("leaderboard").innerHTML =
+            html ||
+            '<div style="text-align:center; color: var(--muted);">No scores yet</div>';
         }
       }
 
       // KEYBOARD CONTROLS
-      document.addEventListener('keydown', (e) => {
+      document.addEventListener("keydown", (e) => {
         if (!gameActive) return;
-        switch(e.key) {
-          case 'ArrowUp': if (direction.y === 0) nextDirection = { x: 0, y: -1 }; break;
-          case 'ArrowDown': if (direction.y === 0) nextDirection = { x: 0, y: 1 }; break;
-          case 'ArrowLeft': if (direction.x === 0) nextDirection = { x: -1, y: 0 }; break;
-          case 'ArrowRight': if (direction.x === 0) nextDirection = { x: 1, y: 0 }; break;
+        switch (e.key) {
+          case "ArrowUp":
+            if (direction.y === 0) nextDirection = { x: 0, y: -1 };
+            break;
+          case "ArrowDown":
+            if (direction.y === 0) nextDirection = { x: 0, y: 1 };
+            break;
+          case "ArrowLeft":
+            if (direction.x === 0) nextDirection = { x: -1, y: 0 };
+            break;
+          case "ArrowRight":
+            if (direction.x === 0) nextDirection = { x: 1, y: 0 };
+            break;
         }
       });
 
-      document.getElementById('statsHighScore').textContent = highScore;
+      document.getElementById("statsHighScore").textContent = highScore;
       loadLeaderboard();
     </script>
   </body>
