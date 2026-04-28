@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8" />
@@ -751,10 +751,7 @@
         ctx.font = 'bold 12px DM Sans';
         ctx.fillStyle = '#a78bfa';
         const survivalSeconds = Math.floor(gameState.survivalTime / 60);
-        let waveType = 'Normal';
-        if (gameState.wave === 16) waveType = '🔥 BOSS!';
-        else if (gameState.wave > 16) waveType = 'Post-Boss';
-        ctx.fillText(`${waveType}`, 20, 100);
+        ctx.fillText(`Difficulty: ${gameState.wave}⭐`, 20, 100);
         ctx.fillText(`Survive: ${survivalSeconds}s`, 20, 115);
       }
 

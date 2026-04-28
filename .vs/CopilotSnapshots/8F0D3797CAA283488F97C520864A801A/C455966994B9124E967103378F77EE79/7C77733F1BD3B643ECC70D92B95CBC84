@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8" />
@@ -751,10 +751,7 @@
         ctx.font = 'bold 12px DM Sans';
         ctx.fillStyle = '#a78bfa';
         const survivalSeconds = Math.floor(gameState.survivalTime / 60);
-        let waveType = 'Normal';
-        if (gameState.wave === 16) waveType = '🔥 BOSS!';
-        else if (gameState.wave > 16) waveType = 'Post-Boss';
-        ctx.fillText(`${waveType}`, 20, 100);
+        ctx.fillText(`Difficulty: ${gameState.wave}⭐`, 20, 100);
         ctx.fillText(`Survive: ${survivalSeconds}s`, 20, 115);
       }
 
@@ -832,42 +829,18 @@
       }
 
       // ==================== UPGRADES UI ====================
-      function showBossDefeatModal() {
-        const modal = document.getElementById('waveClearModal');
-        const optionsDiv = document.getElementById('upgradeOptions');
-        const boxH2 = modal.querySelector('h2');
-        const boxScore = modal.querySelector('.score');
-
-        boxH2.textContent = '🎉 BOSS DEFEATED!';
-        boxScore.innerHTML = 'You\'ve progressed far! Continue to face more challenges?';
-        optionsDiv.innerHTML = '';
-
-        const continueBtn = document.createElement('button');
-        continueBtn.className = 'btn-custom btn-primary';
-        continueBtn.innerHTML = '✨ Continue Wave 17';
-        continueBtn.onclick = () => {
-          modal.classList.remove('active');
-          gameState.wave++;
-          gameState.health = gameState.maxHealth;
-          game.enemies = [];
-          spawnEnemies();
-          gameState.running = true;
-          gameLoop();
-        };
-        optionsDiv.appendChild(continueBtn);
-
-        modal.classList.add('active');
-      }
-
       function showWaveClearModal() {
         const modal = document.getElementById('waveClearModal');
         const optionsDiv = document.getElementById('upgradeOptions');
-        const boxH2 = modal.querySelector('h2');
-        const boxScore = modal.querySelector('.score');
-
-        boxH2.textContent = 'WAVE CLEAR!';
-        boxScore.innerHTML = 'Choose an upgrade to continue';
         optionsDiv.innerHTML = '';
+
+        // Auto-apply difficulty boost every 5 waves
+        if (gameState.wave % 5 === 0) {
+          gameState.multiplierLevel = Math.floor(gameState.wave / 5);
+          gameState.maxHealth += 15;
+          gameState.health = gameState.maxHealth;
+          playerStats.damage *= 1.15;
+        }
 
         const selectedUpgrades = [];
         for (let i = 0; i < 3; i++) {
