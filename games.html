@@ -121,7 +121,7 @@
           </a>
         </div>
       </div>
-       <div class="card-game">
+      <div class="card-game">
         <img src="fourth-preview.jpg" />
         <div class="card-body">
           <h3>🔥 super_snake Game</h3>
@@ -131,7 +131,7 @@
           </a>
         </div>
       </div>
-       <div class="card-game">
+      <div class="card-game">
         <img src="fourth-preview.jpg" />
         <div class="card-body">
           <h3>🔥 rhythm Game</h3>
@@ -143,4 +143,41 @@
       </div>
     </div>
   </body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <!-- <script>
+    const db = window.supabase.createClient(
+      "https://YOUR_PROJECT.supabase.co",
+      "YOUR_ANON_KEY",
+    );
+
+    async function loadGames() {
+      const { data, error } = await db.from("games").select("*");
+
+      const grid = document.querySelector(".game-grid");
+      grid.innerHTML = "";
+
+      if (error) {
+        grid.innerHTML = "<h3>โหลดเกมไม่สำเร็จ</h3>";
+        return;
+      }
+
+      data.forEach((game) => {
+        grid.innerHTML += `
+      <div class="card-game">
+        <img src="${game.image_url}">
+        <div class="card-body">
+          <h3>🎮 ${game.title}</h3>
+          <p>${game.description}</p>
+          <a href="${game.path}">
+            <button class="play-btn">▶ เล่นเกม</button>
+          </a>
+        </div>
+      </div>
+    `;
+      });
+    }
+
+    loadGames();
+  </script> -->
 </html>
