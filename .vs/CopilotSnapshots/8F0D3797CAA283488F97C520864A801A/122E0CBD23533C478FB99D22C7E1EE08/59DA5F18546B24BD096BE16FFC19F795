@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
@@ -98,16 +98,6 @@
             <button class="play-btn">▶ เล่นเกม</button>
           </a>
         </div>
-      <div class="card-game">
-        <img src="plane-preview.jpg" />
-        <div class="card-body">
-          <h3>✈ Plane Shooter</h3>
-          <p>เกมยิงเครื่องบินแบบ Roguelike</p>
-          <a href="plane_shooter.html">
-            <button class="play-btn">▶ เล่นเกม</button>
-          </a>
-        </div>
-      </div>
       </div>
 
       <div class="card-game">
