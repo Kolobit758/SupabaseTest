@@ -1,0 +1,1198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #080810;
+        --surface: #0f0f1a;
+        --surface2: #161625;
+        --border: rgba(255, 255, 255, 0.07);
+        --accent: #e8ff47;
+        --accent-dim: rgba(232, 255, 71, 0.12);
+        --text: #f0f0f0;
+        --muted: rgba(255, 255, 255, 0.35);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        overflow-x: hidden;
+      }
+
+      /* HERO */
+      .hero {
+        position: relative;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .slide {
+        position: absolute;
+        inset: -80px;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        transition: opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+      }
+      .slide.active {
+        opacity: 1;
+      }
+      .slide-1 {
+        background-image: url("meow.png");
+      }
+      .slide-2 {
+        background-image: url("meow1.png");
+      }
+      .slide-3 {
+        background-image: url("meow2.png");
+      }
+      .slide-4 {
+        background-image: url("meow3.png");
+      }
+      .slide-5 {
+        background-image: url("meow4.png");
+      }
+      .slide-6 {
+        background-image: url("meow5.png");
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(8, 8, 16, 0.2) 0%,
+          rgba(8, 8, 16, 0.5) 60%,
+          rgba(8, 8, 16, 1) 100%
+        );
+        z-index: 1;
+      }
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 0 24px;
+      }
+      .hero-eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 16px;
+        opacity: 0;
+        animation: fadeUp 0.8s 0.3s ease forwards;
+      }
+      .hero-title {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: clamp(5rem, 12vw, 10rem);
+        line-height: 0.9;
+        color: #fff;
+        opacity: 0;
+        animation: fadeUp 0.8s 0.5s ease forwards;
+      }
+      .hero-title span {
+        color: var(--accent);
+      }
+      .hero-sub {
+        margin-top: 16px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 15px;
+        font-weight: 300;
+        opacity: 0;
+        animation: fadeUp 0.8s 0.7s ease forwards;
+      }
+      .arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 3;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #fff;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.2s,
+          border-color 0.2s,
+          transform 0.2s;
+        backdrop-filter: blur(8px);
+      }
+      .arrow:hover {
+        background: rgba(232, 255, 71, 0.15);
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-50%) scale(1.08);
+      }
+      .arrow-left {
+        left: 28px;
+      }
+      .arrow-right {
+        right: 28px;
+      }
+      .dots {
+        position: absolute;
+        bottom: 36px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+        z-index: 3;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .dot.active {
+        background: var(--accent);
+        width: 24px;
+        border-radius: 3px;
+      }
+      .scroll-hint {
+        position: absolute;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        color: rgba(255, 255, 255, 0.3);
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+      .scroll-bar {
+        width: 1px;
+        height: 48px;
+        background: linear-gradient(
+          to bottom,
+          rgba(232, 255, 71, 0.6),
+          transparent
+        );
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.2;
+        }
+      }
+
+      /* MAIN */
+      .main {
+        padding: 64px 32px 80px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .section-label {
+        font-size: 10px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 10px;
+      }
+      .form-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 32px;
+        margin-bottom: 48px;
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.2s ease forwards;
+      }
+      .form-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 20%;
+        right: 20%;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent),
+          transparent
+        );
+        opacity: 0.5;
+      }
+      .form-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      input[type="text"] {
+        flex: 1;
+        min-width: 160px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 13px 18px;
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        outline: none;
+        transition:
+          border-color 0.25s,
+          box-shadow 0.25s;
+      }
+      input::placeholder {
+        color: var(--muted);
+      }
+      input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(232, 255, 71, 0.1);
+      }
+      .upload-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface2);
+        border: 1px dashed rgba(232, 255, 71, 0.3);
+        border-radius: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--muted);
+        transition:
+          border-color 0.2s,
+          color 0.2s,
+          background 0.2s;
+        white-space: nowrap;
+      }
+      .upload-label:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(232, 255, 71, 0.05);
+      }
+      .upload-label input {
+        display: none;
+      }
+      .upload-label .icon {
+        font-size: 16px;
+      }
+      #fileNameDisplay {
+        font-size: 12px;
+        color: var(--accent);
+      }
+      .btn-add {
+        background: var(--accent);
+        border: none;
+        border-radius: 12px;
+        padding: 13px 28px;
+        color: #080810;
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        box-shadow: 0 4px 24px rgba(232, 255, 71, 0.25);
+      }
+      .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(232, 255, 71, 0.4);
+      }
+      .btn-add:active {
+        transform: scale(0.97);
+      }
+      .btn-add:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* stats */
+      .stats-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.35s ease forwards;
+      }
+      .stats-title {
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .count {
+        font-size: 12px;
+        color: var(--accent);
+        background: var(--accent-dim);
+        border: 1px solid rgba(232, 255, 71, 0.2);
+        padding: 3px 12px;
+        border-radius: 999px;
+        font-weight: 500;
+      }
+
+      /* grid */
+      #list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+      }
+
+      /* student card */
+      .student-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+        animation: cardIn 0.4s ease forwards;
+        transition:
+          border-color 0.25s,
+          box-shadow 0.25s,
+          transform 0.25s;
+      }
+      .student-card:hover {
+        border-color: rgba(232, 255, 71, 0.25);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        transform: translateY(-4px) scale(1.01);
+      }
+      @keyframes cardIn {
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .card-img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        display: block;
+        background: var(--surface2);
+      }
+      .card-avatar-fallback {
+        width: 100%;
+        height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1c1c30, #2a2a45);
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 64px;
+        color: var(--accent);
+        letter-spacing: 2px;
+      }
+      .card-body {
+        padding: 18px;
+      }
+      .card-name {
+        font-size: 15px;
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      .card-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 3px 10px;
+        border-radius: 999px;
+        margin-bottom: 16px;
+      }
+      .pulse-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+      }
+      .status-available {
+        background: rgba(74, 222, 128, 0.1);
+        color: #4ade80;
+        border: 1px solid rgba(74, 222, 128, 0.2);
+      }
+      .status-available .pulse-dot {
+        background: #4ade80;
+        animation: blink 2s infinite;
+      }
+      .status-busy {
+        background: rgba(248, 113, 113, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.2);
+      }
+      .status-busy .pulse-dot {
+        background: #f87171;
+      }
+      .status-other {
+        background: var(--accent-dim);
+        color: var(--accent);
+        border: 1px solid rgba(232, 255, 71, 0.15);
+      }
+      .status-other .pulse-dot {
+        background: var(--accent);
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      /* ✅ Card action buttons — properly styled */
+      .card-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .btn-edit,
+      .btn-delete {
+        flex: 1;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 0;
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          transform 0.15s,
+          background 0.15s,
+          box-shadow 0.15s;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-edit {
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .btn-edit:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        transform: translateY(-1px);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+      .btn-delete {
+        background: rgba(248, 113, 113, 0.08);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.18);
+      }
+      .btn-delete:hover {
+        background: rgba(248, 113, 113, 0.2);
+        box-shadow: 0 4px 16px rgba(248, 113, 113, 0.15);
+        transform: translateY(-1px);
+      }
+      .btn-edit:active,
+      .btn-delete:active {
+        transform: scale(0.96);
+      }
+
+      /* ripple */
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        animation: rippleAnim 0.5s linear;
+        background: rgba(255, 255, 255, 0.15);
+        pointer-events: none;
+      }
+      @keyframes rippleAnim {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+
+      /* empty */
+      .empty {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 64px 20px;
+        color: var(--muted);
+      }
+      .empty-icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+        opacity: 0.3;
+      }
+
+      /* toast */
+      .toast {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 2px solid var(--accent);
+        color: var(--text);
+        font-size: 13px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        z-index: 9999;
+        opacity: 0;
+        transform: translateY(12px);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ✅ EDIT MODAL */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(6px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      .modal-backdrop.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: var(--surface);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 32px;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        transform: translateY(24px) scale(0.97);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .modal-backdrop.open .modal {
+        transform: translateY(0) scale(1);
+      }
+      .modal::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 20%;
+        right: 20%;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent),
+          transparent
+        );
+        opacity: 0.5;
+      }
+      .modal-title {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 26px;
+        letter-spacing: 0.05em;
+        color: var(--accent);
+        margin-bottom: 24px;
+      }
+      .modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--muted);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .modal-close:hover {
+        background: rgba(248, 113, 113, 0.15);
+        color: #f87171;
+        border-color: rgba(248, 113, 113, 0.3);
+      }
+      .modal-field {
+        margin-bottom: 14px;
+      }
+      .modal-field label {
+        display: block;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .modal-field input[type="text"] {
+        width: 100%;
+        min-width: unset;
+        flex: unset;
+      }
+
+      /* image preview in modal */
+      .img-preview-wrap {
+        position: relative;
+        margin-bottom: 14px;
+      }
+      .img-preview {
+        width: 100%;
+        height: 180px;
+        border-radius: 12px;
+        object-fit: cover;
+        background: var(--surface2);
+        display: block;
+        border: 1px solid var(--border);
+      }
+      .img-preview-fallback {
+        width: 100%;
+        height: 180px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1c1c30, #2a2a45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 72px;
+        color: var(--accent);
+        border: 1px solid var(--border);
+      }
+      .img-change-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(8, 8, 16, 0.85);
+        border: 1px solid rgba(232, 255, 71, 0.4);
+        color: var(--accent);
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 6px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        transition:
+          background 0.2s,
+          border-color 0.2s;
+      }
+      .img-change-btn:hover {
+        background: rgba(232, 255, 71, 0.15);
+        border-color: var(--accent);
+      }
+      .img-change-btn input {
+        display: none;
+      }
+      .new-img-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: var(--accent);
+        color: #080810;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        padding: 3px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        display: none;
+      }
+      .new-img-badge.visible {
+        display: block;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .btn-modal-cancel {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        border-radius: 12px;
+        padding: 12px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .btn-modal-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text);
+      }
+      .btn-modal-save {
+        flex: 2;
+        background: var(--accent);
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        color: #080810;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 24px rgba(232, 255, 71, 0.25);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .btn-modal-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(232, 255, 71, 0.4);
+      }
+      .btn-modal-save:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HERO -->
+    <div class="hero">
+      <div class="slide slide-1 active"></div>
+      <div class="slide slide-2"></div>
+      <div class="slide slide-3"></div>
+      <div class="slide slide-4"></div>
+      <div class="slide slide-5"></div>
+      <div class="slide slide-6"></div>
+      <div class="hero-overlay"></div>
+      <button class="arrow arrow-left" onclick="prevSlide()">&#8592;</button>
+      <button class="arrow arrow-right" onclick="nextSlide()">&#8594;</button>
+      <div class="hero-content">
+        <div class="hero-eyebrow">Student Management System</div>
+        <h1 class="hero-title">STUDENT<br /><span>SYSTEM</span></h1>
+        <p class="hero-sub">จัดการข้อมูลนักเรียนของคุณ</p>
+      </div>
+      <div class="scroll-hint">
+        <span>scroll</span>
+        <div class="scroll-bar"></div>
+      </div>
+      <div class="dots" id="dots">
+        <div class="dot active" onclick="goSlide(0)"></div>
+        <div class="dot" onclick="goSlide(1)"></div>
+        <div class="dot" onclick="goSlide(2)"></div>
+        <div class="dot" onclick="goSlide(3)"></div>
+        <div class="dot" onclick="goSlide(4)"></div>
+        <div class="dot" onclick="goSlide(5)"></div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="form-card">
+        <div class="section-label">+ เพิ่มนักเรียนใหม่</div>
+        <div class="form-row">
+          <input id="nameInput" type="text" placeholder="ชื่อนักเรียน" />
+          <input
+            id="statusInput"
+            type="text"
+            placeholder="สถานะ — available / busy"
+          />
+          <label class="upload-label">
+            <span class="icon">📷</span>
+            <span id="fileNameDisplay">เลือกรูป</span>
+            <input
+              type="file"
+              id="avatarInput"
+              accept="image/*"
+              onchange="onFileChange(this)"
+            />
+          </label>
+          <button class="btn-add" id="btnAdd" onclick="addStudent()">
+            เพิ่ม →
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <span class="stats-title">นักเรียนทั้งหมด</span>
+        <span class="count" id="countBadge">0</span>
+      </div>
+
+      <div id="list"></div>
+    </div>
+
+    <!-- ✅ EDIT MODAL -->
+    <div class="modal-backdrop" id="editModal">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="modal-title">แก้ไขนักเรียน</div>
+
+        <!-- image preview + change button -->
+        <div class="img-preview-wrap">
+          <span class="new-img-badge" id="newImgBadge">รูปใหม่</span>
+          <img
+            class="img-preview"
+            id="modalImgPreview"
+            src=""
+            alt=""
+            style="display: none"
+          />
+          <div
+            class="img-avatar-fallback img-preview-fallback"
+            id="modalImgFallback"
+          ></div>
+          <label class="img-change-btn">
+            📷 เปลี่ยนรูป
+            <input
+              type="file"
+              id="modalAvatarInput"
+              accept="image/*"
+              onchange="onModalFileChange(this)"
+            />
+          </label>
+        </div>
+
+        <div class="modal-field">
+          <label>ชื่อนักเรียน</label>
+          <input type="text" id="modalNameInput" placeholder="ชื่อนักเรียน" />
+        </div>
+        <div class="modal-field">
+          <label>สถานะ</label>
+          <input
+            type="text"
+            id="modalStatusInput"
+            placeholder="available / busy"
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" onclick="closeModal()">
+            ยกเลิก
+          </button>
+          <button class="btn-modal-save" id="btnModalSave" onclick="saveEdit()">
+            💾 บันทึก
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      // SLIDESHOW
+      let current = 0;
+      const slides = document.querySelectorAll(".slide");
+      const dots = document.querySelectorAll(".dot");
+      function goSlide(n) {
+        slides[current].classList.remove("active");
+        dots[current].classList.remove("active");
+        current = (n + slides.length) % slides.length;
+        slides[current].classList.add("active");
+        dots[current].classList.add("active");
+      }
+      function nextSlide() {
+        goSlide(current + 1);
+      }
+      function prevSlide() {
+        goSlide(current - 1);
+      }
+      setInterval(nextSlide, 5000);
+      window.addEventListener("scroll", () => {
+        const y = window.scrollY;
+        slides.forEach((s) => {
+          s.style.transform = `translateY(${y * 0.38}px)`;
+        });
+      });
+
+      // TOAST
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2500);
+      }
+
+      // HELPERS
+      function getInitial(n) {
+        return n ? n.charAt(0).toUpperCase() : "?";
+      }
+      function getStatusClass(s) {
+        const v = (s || "").toLowerCase();
+        if (v === "available") return "status-available";
+        if (v === "busy") return "status-busy";
+        return "status-other";
+      }
+
+      function onFileChange(input) {
+        document.getElementById("fileNameDisplay").textContent = input.files[0]
+          ? input.files[0].name
+          : "เลือกรูป";
+      }
+
+      // SUPABASE
+      const db = window.supabase.createClient(
+        "https://mhmchtcteweifnjegdgw.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1obWNodGN0ZXdlaWZuamVnZGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNDgzMjAsImV4cCI6MjA5MjkyNDMyMH0.7V0ZuFl2ESRkgEQnB1CX3_AZYSwkXwXl10vcVNNCDpQ",
+      );
+
+      // UPLOAD
+      async function uploadAvatar(file) {
+        if (!file) return null;
+        const ext = file.name.split(".").pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+        const { data, error } = await db.storage
+          .from("avatars")
+          .upload(fileName, file);
+        if (error) {
+          console.error(error);
+          showToast("❌ upload พลาด");
+          return null;
+        }
+        const { data: urlData } = db.storage
+          .from("avatars")
+          .getPublicUrl(data.path);
+        return urlData.publicUrl;
+      }
+
+      // ADD
+      async function addStudent() {
+        const name = document.getElementById("nameInput").value.trim();
+        const status = document.getElementById("statusInput").value.trim();
+        const file = document.getElementById("avatarInput").files[0];
+        if (!name) return;
+        const btn = document.getElementById("btnAdd");
+        btn.disabled = true;
+        btn.textContent = "กำลังอัพโหลด...";
+        const avatarUrl = await uploadAvatar(file);
+        const { error } = await db
+          .from("meow")
+          .insert([
+            { name, status: status || "available", avatar_url: avatarUrl },
+          ]);
+        btn.disabled = false;
+        btn.textContent = "เพิ่ม →";
+        if (error) {
+          console.error(error);
+          showToast("❌ เพิ่มไม่สำเร็จ");
+          return;
+        }
+        document.getElementById("nameInput").value = "";
+        document.getElementById("statusInput").value = "";
+        document.getElementById("avatarInput").value = "";
+        document.getElementById("fileNameDisplay").textContent = "เลือกรูป";
+        showToast("✓ เพิ่มแล้ว");
+        loadStudents();
+      }
+
+      // LOAD
+      async function loadStudents() {
+        const { data, error } = await db.from("meow").select("*");
+        const list = document.getElementById("list");
+        if (error || !data) {
+          console.error(error);
+          list.innerHTML = "โหลดไม่ได้";
+          return;
+        }
+        document.getElementById("countBadge").textContent = data.length;
+        list.innerHTML = "";
+        if (data.length === 0) {
+          list.innerHTML = `<div class="empty"><div class="empty-icon">🎓</div><div>ยังไม่มีนักเรียน</div></div>`;
+          return;
+        }
+        data.forEach((s, i) => {
+          const card = document.createElement("div");
+          card.className = "student-card";
+          card.style.animationDelay = `${i * 0.05}s`;
+          const img = s.avatar_url
+            ? `<img class="card-img" src="${s.avatar_url}" alt="${s.name}">`
+            : `<div class="card-avatar-fallback">${getInitial(s.name)}</div>`;
+          card.innerHTML = `
+            ${img}
+            <div class="card-body">
+              <div class="card-name">${s.name}</div>
+              <div class="card-status ${getStatusClass(s.status)}">
+                <span class="pulse-dot"></span>${s.status}
+              </div>
+              <div class="card-actions">
+                <button class="btn-edit">✏️ แก้ไข</button>
+                <button class="btn-delete">🗑 ลบ</button>
+              </div>
+            </div>`;
+          card.querySelector(".btn-edit").onclick = () => openEditModal(s);
+          card.querySelector(".btn-delete").onclick = () =>
+            deleteStudent(s.id, s.avatar_url);
+          list.appendChild(card);
+        });
+      }
+
+      // DELETE
+      async function deleteStudent(id, avatarUrl) {
+        if (!confirm("ยืนยันการลบนักเรียนคนนี้?")) return;
+        if (avatarUrl) {
+          const path = avatarUrl.split("/avatars/")[1];
+          if (path) await db.storage.from("avatars").remove([path]);
+        }
+        await db.from("meow").delete().eq("id", id);
+        showToast("✓ ลบแล้ว");
+        loadStudents();
+      }
+
+      // ✅ MODAL EDIT — state
+      let editingId = null;
+      let editingOldAvatar = null;
+      let newAvatarFile = null;
+
+      function openEditModal(student) {
+        editingId = student.id;
+        editingOldAvatar = student.avatar_url;
+        newAvatarFile = null;
+
+        document.getElementById("modalNameInput").value = student.name;
+        document.getElementById("modalStatusInput").value = student.status;
+        document.getElementById("modalAvatarInput").value = "";
+        document.getElementById("newImgBadge").classList.remove("visible");
+
+        const preview = document.getElementById("modalImgPreview");
+        const fallback = document.getElementById("modalImgFallback");
+
+        if (student.avatar_url) {
+          preview.src = student.avatar_url;
+          preview.style.display = "block";
+          fallback.style.display = "none";
+        } else {
+          preview.style.display = "none";
+          fallback.style.display = "flex";
+          fallback.textContent = getInitial(student.name);
+        }
+
+        document.getElementById("editModal").classList.add("open");
+      }
+
+      function closeModal() {
+        document.getElementById("editModal").classList.remove("open");
+        editingId = null;
+        editingOldAvatar = null;
+        newAvatarFile = null;
+      }
+
+      // ✅ เปลี่ยนรูปใน modal — preview ทันที
+      function onModalFileChange(input) {
+        if (!input.files[0]) return;
+        newAvatarFile = input.files[0];
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const preview = document.getElementById("modalImgPreview");
+          const fallback = document.getElementById("modalImgFallback");
+          preview.src = e.target.result;
+          preview.style.display = "block";
+          fallback.style.display = "none";
+          document.getElementById("newImgBadge").classList.add("visible");
+        };
+        reader.readAsDataURL(newAvatarFile);
+      }
+
+      // ✅ SAVE EDIT
+      async function saveEdit() {
+        const name = document.getElementById("modalNameInput").value.trim();
+        const status = document.getElementById("modalStatusInput").value.trim();
+        if (!name || !status) {
+          showToast("⚠️ กรุณากรอกข้อมูลให้ครบ");
+          return;
+        }
+
+        const btn = document.getElementById("btnModalSave");
+        btn.disabled = true;
+        btn.textContent = "กำลังบันทึก...";
+
+        let avatarUrl = editingOldAvatar;
+
+        if (newAvatarFile) {
+          // ลบรูปเก่า
+          if (editingOldAvatar) {
+            const oldPath = editingOldAvatar.split("/avatars/")[1];
+            if (oldPath) await db.storage.from("avatars").remove([oldPath]);
+          }
+          avatarUrl = await uploadAvatar(newAvatarFile);
+        }
+
+        const { error } = await db
+          .from("meow")
+          .update({ name, status, avatar_url: avatarUrl })
+          .eq("id", editingId);
+
+        btn.disabled = false;
+        btn.textContent = "💾 บันทึก";
+
+        if (error) {
+          console.error(error);
+          showToast("❌ บันทึกไม่สำเร็จ");
+          return;
+        }
+
+        showToast("✓ อัพเดทแล้ว");
+        closeModal();
+        loadStudents();
+      }
+
+      // close modal on backdrop click
+      document
+        .getElementById("editModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) closeModal();
+        });
+
+      // ENTER to add
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal();
+        if (
+          e.key === "Enter" &&
+          !document.getElementById("editModal").classList.contains("open")
+        )
+          addStudent();
+      });
+
+      loadStudents();
+    </script>
+  </body>
+</html>
