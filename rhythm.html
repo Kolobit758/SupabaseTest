@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Rhythm Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --lane-width: 80px;
+            --game-height: 600px;
+            --judgement-line-y: 520px;
+        }
+
+        body {
+            background-color: #0f0f0f;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* พื้นที่วาง Navbar ของคุณ */
+        .my-navbar-placeholder {
+            width: 100%;
+            min-height: 56px;
+            background: #222;
+            border-bottom: 1px solid #444;
+        }
+
+        #game-board {
+            width: calc(var(--lane-width) * 4);
+            height: var(--game-height);
+            background: #1a1a1a;
+            margin: 20px auto;
+            position: relative;
+            border: 3px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .lane {
+            width: var(--lane-width);
+            height: 100%;
+            float: left;
+            border-right: 1px solid #333;
+            position: relative;
+        }
+
+        .lane:last-child { border-right: none; }
+
+        /* เส้นตัดสิน */
+        .judgement-line {
+            position: absolute;
+            top: var(--judgement-line-y);
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 1;
+        }
+
+        /* ตัวโน้ต */
+        .note {
+            width: 90%;
+            height: 20px;
+            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+            position: absolute;
+            left: 5%;
+            border-radius: 4px;
+            box-shadow: 0 0 10px #4facfe;
+        }
+
+        /* เอฟเฟกต์ตอนกดปุ่ม */
+        .key-hint {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .lane.active {
+            background: linear-gradient(to top, rgba(79, 172, 254, 0.2), transparent);
+        }
+
+        .combo-text {
+            font-size: 1.5rem;
+            color: #ffcc00;
+            text-shadow: 0 0 5px rgba(255,204,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark px-3">
+      <a class="navbar-brand text-warning" href="index.html">🎓 Students</a>
+      <a class="btn btn-outline-light btn-sm" href="games.html">Home</a>
+    </nav>
+    <div class="my-navbar-placeholder d-flex align-items-center justify-content-center text-secondary">
+        Navbar Section
+    </div>
+
+    <div class="container text-center mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h2 class="fw-bold text-info">RHYTHM BATTLE</h2>
+                <div class="d-flex justify-content-around bg-dark p-2 rounded-3 border border-secondary mb-3">
+                    <div>SCORE: <span id="score-val" class="text-warning fw-bold">0</span></div>
+                    <div>COMBO: <span id="combo-val" class="text-success fw-bold">0</span></div>
+                </div>
+
+                <div id="game-board">
+                    <div class="judgement-line"></div>
+                    
+                    <div class="lane" id="lane-0"><div class="key-hint">S</div></div>
+                    <div class="lane" id="lane-1"><div class="key-hint">D</div></div>
+                    <div class="lane" id="lane-2"><div class="key-hint">K</div></div>
+                    <div class="lane" id="lane-3"><div class="key-hint">L</div></div>
+                </div>
+
+                <button class="btn btn-outline-info px-5" onclick="startGame()" id="start-btn">START GAME</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const lanes = [
+            document.getElementById('lane-0'),
+            document.getElementById('lane-1'),
+            document.getElementById('lane-2'),
+            document.getElementById('lane-3')
+        ];
+        const scoreVal = document.getElementById('score-val');
+        const comboVal = document.getElementById('combo-val');
+        const startBtn = document.getElementById('start-btn');
+
+        const keyMap = { 's': 0, 'd': 1, 'k': 2, 'l': 3 };
+        let score = 0;
+        let combo = 0;
+        let notes = [];
+        let gameRunning = false;
+        let noteSpeed = 4;
+        let spawnRate = 800; // ms
+
+        function spawnNote() {
+            if (!gameRunning) return;
+            
+            const laneIdx = Math.floor(Math.random() * 4);
+            const noteEl = document.createElement('div');
+            noteEl.className = 'note';
+            noteEl.style.top = '-20px';
+            lanes[laneIdx].appendChild(noteEl);
+
+            notes.push({
+                el: noteEl,
+                y: -20,
+                lane: laneIdx,
+                hit: false
+            });
+        }
+
+        function update() {
+            if (!gameRunning) return;
+
+            for (let i = notes.length - 1; i >= 0; i--) {
+                let n = notes[i];
+                n.y += noteSpeed;
+                n.el.style.top = n.y + 'px';
+
+                // หลุดจอ (Miss)
+                if (n.y > 600) {
+                    if (!n.hit) {
+                        combo = 0;
+                        comboVal.innerText = combo;
+                    }
+                    n.el.remove();
+                    notes.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            const key = e.key.toLowerCase();
+            
+            if (keyMap.hasOwnProperty(key)) {
+                const laneIdx = keyMap[key];
+                lanes[laneIdx].classList.add('active');
+
+                // ตรวจสอบการ Hit (ระยะ 480px - 560px โดยประมาณจากเส้น 520px)
+                const targetNote = notes.find(n => 
+                    n.lane === laneIdx && 
+                    !n.hit && 
+                    n.y > 470 && 
+                    n.y < 550
+                );
+
+                if (targetNote) {
+                    targetNote.hit = true;
+                    targetNote.el.style.display = 'none';
+                    score += 100 + (combo * 10);
+                    combo++;
+                    scoreVal.innerText = score;
+                    comboVal.innerText = combo;
+                } else {
+                    combo = 0;
+                    comboVal.innerText = combo;
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (keyMap.hasOwnProperty(key)) {
+                lanes[keyMap[key]].classList.remove('active');
+            }
+        });
+
+        function startGame() {
+            if (gameRunning) return;
+            gameRunning = true;
+            score = 0;
+            combo = 0;
+            notes = [];
+            scoreVal.innerText = '0';
+            comboVal.innerText = '0';
+            startBtn.classList.add('disabled');
+            
+            update();
+            setInterval(spawnNote, spawnRate);
+            
+            // เพิ่มความยากตามเวลา
+            setInterval(() => {
+                if(noteSpeed < 10) noteSpeed += 0.5;
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
