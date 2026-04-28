@@ -1,7 +1,7 @@
 {
   "name": "MeowApp",
   "short_name": "App",
-  "start_url": "/",
+  "start_url": "/SupabaseTest/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
