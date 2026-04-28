@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MRX ESCAPE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #050510;
+      --surface: #0d0d1e;
+      --surface2: #12122a;
+      --border: rgba(160,80,255,0.15);
+      --accent: #c030ff;
+      --accent2: #ff3060;
+      --accent3: #30c0ff;
+      --text: #e8e0ff;
+      --muted: rgba(200,180,255,0.4);
+      --glow: rgba(192,48,255,0.4);
+      --dot-color: #ffd700;
+      --wall-color: #1a0a3a;
+      --wall-border: #4010a0;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content:'';
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 20%, rgba(192,48,255,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(48,100,255,0.06) 0%, transparent 70%);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .navbar {
+      background: var(--surface) !important;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 10;
+    }
+    .navbar-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      color: #c030ff !important;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-btn {
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { color: var(--text); background: var(--surface2); }
+    .nav-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+
+    .main-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .title-zone {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .game-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #c030ff, #ff3060, #30c0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.08em;
+      text-shadow: none;
+      filter: drop-shadow(0 0 20px rgba(192,48,255,0.5));
+    }
+    .game-subtitle {
+      font-size: 12px;
+      letter-spacing: 0.3em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .game-area {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* SIDE PANELS */
+    .side-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      min-width: 200px;
+      flex-shrink: 0;
+    }
+    .panel-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .stat-label { color: var(--muted); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      color: var(--dot-color);
+    }
+
+    .lives-display { display: flex; gap: 4px; font-size: 20px; margin: 6px 0; }
+
+    .mrx-info {
+      background: rgba(255,48,96,0.1);
+      border: 1px solid rgba(255,48,96,0.3);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .mrx-sprite {
+      font-size: 48px;
+      display: block;
+      filter: drop-shadow(0 0 12px rgba(255,48,96,0.8));
+      animation: mrxFloat 2s ease-in-out infinite;
+    }
+    @keyframes mrxFloat {
+      0%,100%{transform:translateY(0) scale(1);}
+      50%{transform:translateY(-4px) scale(1.05);}
+    }
+    .mrx-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      color: var(--accent2);
+      margin-top: 4px;
+      letter-spacing: 0.1em;
+    }
+    .mrx-desc { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+    .danger-bar {
+      height: 6px;
+      background: rgba(255,48,96,0.2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .danger-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff3060, #ff8060);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    /* CANVAS AREA */
+    .canvas-wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid rgba(192,48,255,0.3);
+      box-shadow:
+        0 0 40px rgba(192,48,255,0.2),
+        inset 0 0 60px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+    }
+    #gameCanvas {
+      display: block;
+      background: #02020e;
+    }
+
+    /* OVERLAY */
+    .game-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5,5,20,0.92);
+      z-index: 20;
+      backdrop-filter: blur(4px);
+    }
+    .overlay-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #c030ff, #ff3060);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .overlay-sub {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+    .btn-start {
+      padding: 12px 36px;
+      background: linear-gradient(135deg, #c030ff, #8020dd);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+      box-shadow: 0 0 20px rgba(192,48,255,0.4);
+    }
+    .btn-start:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(192,48,255,0.6); }
+
+    .room-section {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .room-input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      outline: none;
+      margin-bottom: 6px;
+    }
+    .room-input::placeholder { color: var(--muted); }
+    .room-input:focus { border-color: var(--accent); }
+    .btn-room {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: rgba(192,48,255,0.15);
+      color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+    .btn-room:hover { background: rgba(192,48,255,0.3); }
+
+    .status-dot {
+      width:6px; height:6px; border-radius:50%;
+      background:#4ade80;
+      animation: blink 1.5s infinite;
+      display:inline-block; margin-right:6px;
+    }
+    .status-offline { background:#666; animation:none; }
+    @keyframes blink {0%,100%{opacity:1}50%{opacity:0.2}}
+
+    .leaderboard-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--muted);
+    }
+    .leaderboard-row:first-child { color: var(--dot-color); }
+    .leaderboard-row:nth-child(2) { color: #ccc; }
+    .leaderboard-row:nth-child(3) { color: #cd7f32; }
+
+    .controls-hint {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .key-hint {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 4px 8px;
+      text-align: center;
+    }
+
+    /* TOAST */
+    .toast-msg {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+    .toast-msg.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 820px) {
+      .game-area { flex-direction: column; align-items: center; }
+      .side-panel { min-width: unset; width: 100%; max-width: 560px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="index.html">🎓 STUDENTS</a>
+  <div class="nav-links">
+    <a class="nav-btn" href="index.html">Students</a>
+    <a class="nav-btn" href="chess.html">♟ Chess</a>
+    <a class="nav-btn active" href="mrx-escape.html">👻 MRX Escape</a>
+  </div>
+</nav>
+
+<div class="main-layout">
+  <div class="title-zone">
+    <div class="game-title">MRX ESCAPE</div>
+    <div class="game-subtitle">หนีจาก Mewtwo Mega Y ให้ได้ถ้าทำได้</div>
+  </div>
+
+  <div class="game-area">
+
+    <!-- LEFT PANEL -->
+    <div class="side-panel" style="width:200px;">
+      <div class="panel-title">🎮 Controls</div>
+      <div class="controls-hint">
+        <div class="key-hint">↑ W</div>
+        <div class="key-hint">↓ S</div>
+        <div class="key-hint">← A</div>
+        <div class="key-hint">→ D</div>
+      </div>
+      <div style="height:1px;background:var(--border);margin:14px 0;"></div>
+      <div class="panel-title">📡 Online</div>
+      <div class="room-section">
+        <input class="room-input" id="playerName" placeholder="ชื่อผู้เล่น"/>
+        <button class="btn-room" onclick="saveScore()">💾 บันทึกคะแนน</button>
+      </div>
+      <div id="onlineStatus" style="font-size:11px;color:var(--muted);display:flex;align-items:center;">
+        <span class="status-dot status-offline" id="statusDot"></span>
+        <span id="statusText">ไม่ได้เชื่อมต่อ</span>
+      </div>
+      <div style="height:1px;background:var(--border);margin:14px 0;"></div>
+      <div class="panel-title">🏆 Leaderboard</div>
+      <div id="leaderboard">
+        <div style="font-size:11px;color:var(--muted);">กำลังโหลด...</div>
+      </div>
+    </div>
+
+    <!-- GAME CANVAS -->
+    <div class="canvas-wrap">
+      <canvas id="gameCanvas" width="560" height="560"></canvas>
+      <div class="game-overlay" id="gameOverlay">
+        <div class="overlay-title" id="overlayTitle">MRX ESCAPE</div>
+        <div class="overlay-sub" id="overlaySub">
+          🟣 <strong>Mewtwo Mega Y</strong> กำลังล่าคุณ!<br>
+          🟡 กินจุดให้ได้มากที่สุดโดยไม่โดนจับ<br>
+          ⚡ MRX จะเร็วขึ้นเรื่อยๆ ตามคะแนน<br><br>
+          คุณหนีได้นานแค่ไหน?
+        </div>
+        <button class="btn-start" id="startBtn" onclick="startGame()">▶ เริ่มเกม</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="side-panel" style="width:200px;">
+      <div class="panel-title">📊 Stats</div>
+      <div class="stat-row">
+        <span class="stat-label">Score</span>
+        <span class="stat-value" id="scoreDisplay">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">High Score</span>
+        <span style="font-family:'Orbitron',sans-serif;font-size:14px;color:var(--accent3);" id="hiScoreDisplay">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Lives</span>
+        <div class="lives-display" id="livesDisplay">
+          <span>😊</span><span>😊</span><span>😊</span>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Level</span>
+        <span style="font-family:'Orbitron',sans-serif;font-size:18px;color:#30c0ff;" id="levelDisplay">1</span>
+      </div>
+      <div style="height:1px;background:var(--border);margin:14px 0;"></div>
+
+      <div class="mrx-info">
+        <span class="mrx-sprite" id="mrxSprite">🦋</span>
+        <div class="mrx-name">MRX</div>
+        <div class="mrx-desc">Mewtwo Mega Y<br>ไม่หยุด ไม่ยอม ไม่หลับ</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px;">ความเร็ว MRX</div>
+        <div class="danger-bar">
+          <div class="danger-fill" id="dangerFill" style="width:20%"></div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:14px 0;"></div>
+      <div class="panel-title">🕐 Time</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:28px;color:var(--text);text-align:center;" id="timeDisplay">0:00</div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;">เวลารอด</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-msg" id="toastMsg"></div>
+
+<script>
+// ══════════════════════════════════════
+// SUPABASE
+// ══════════════════════════════════════
+const SUPABASE_URL = "https://mhmchtcteweifnjegdgw.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1obWNodGN0ZXdlaWZuamVnZGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNDgzMjAsImV4cCI6MjA5MjkyNDMyMH0.7V0ZuFl2ESRkgEQnB1CX3_AZYSwkXwXl10vcVNNCDpQ";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ══════════════════════════════════════
+// GAME CONFIG
+// ══════════════════════════════════════
+const CANVAS_W = 560;
+const CANVAS_H = 560;
+const CELL = 28;
+const COLS = CANVAS_W / CELL; // 20
+const ROWS = CANVAS_H / CELL; // 20
+
+// Map: 1=wall, 0=dot, 2=empty(no dot), 3=power pellet
+const BASE_MAP = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
+  [1,3,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,3,1],
+  [1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1],
+  [1,0,0,0,0,1,1,0,1,1,1,1,0,1,1,0,0,0,0,1],
+  [1,1,1,1,0,1,1,0,1,2,2,1,0,1,1,0,1,1,1,1],
+  [1,1,1,1,0,1,1,0,2,2,2,2,0,1,1,0,1,1,1,1],
+  [1,1,1,1,0,0,0,0,2,2,2,2,0,0,0,0,1,1,1,1],
+  [1,1,1,1,0,1,1,0,2,2,2,2,0,1,1,0,1,1,1,1],
+  [2,2,2,2,0,1,1,0,2,2,2,2,0,1,1,0,2,2,2,2],
+  [1,1,1,1,0,1,1,0,2,2,2,2,0,1,1,0,1,1,1,1],
+  [1,1,1,1,0,0,0,0,2,2,2,2,0,0,0,0,1,1,1,1],
+  [1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
+  [1,3,0,1,0,0,0,0,0,2,2,0,0,0,0,0,1,0,3,1],
+  [1,1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,0,1,1],
+  [1,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+
+// ══════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════
+let canvas, ctx;
+let map = [];
+let player = { x:1, y:1, dx:0, dy:0, nextDx:0, nextDy:0, animFrame:0 };
+let mrx = { x:10, y:10, dx:1, dy:0, animFrame:0, mode:'chase', scatter:0 };
+let score = 0;
+let hiScore = parseInt(localStorage.getItem('mrx_hiscore')||'0');
+let lives = 3;
+let level = 1;
+let totalDots = 0;
+let dotsLeft = 0;
+let gameRunning = false;
+let gameOverState = false;
+let startTime = 0;
+let elapsed = 0;
+let frameCount = 0;
+let playerDead = false;
+let deathTimer = 0;
+let powerMode = false;
+let powerTimer = 0;
+let mrxSpeed = 0.4; // frames per move (lower = faster)
+let mrxMoveAccum = 0;
+
+// MRX animation frames (Mewtwo Mega Y)
+const MRX_FRAMES = ['🦋','✨','🦋','💜'];
+const PLAYER_FRAMES_R = ['😮','😶'];
+const PLAYER_OPEN = '😮';
+const PLAYER_CLOSED = '😶';
+const PLAYER_DEAD = ['💀','😵','💀','😵'];
+
+let animTick = 0;
+let mrxTrail = [];
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+function initMap() {
+  map = BASE_MAP.map(row => [...row]);
+  totalDots = 0;
+  for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) {
+    if (map[r][c]===0 || map[r][c]===3) totalDots++;
+  }
+  dotsLeft = totalDots;
+}
+
+function resetPositions() {
+  player = { x:1, y:1, dx:0, dy:0, nextDx:1, nextDy:0, animFrame:0 };
+  mrx = { x:10, y:9, dx:1, dy:0, animFrame:0 };
+  mrxTrail = [];
+  playerDead = false;
+  deathTimer = 0;
+  powerMode = false;
+  powerTimer = 0;
+  mrxMoveAccum = 0;
+}
+
+function startGame() {
+  document.getElementById('gameOverlay').style.display = 'none';
+  initMap();
+  score = 0;
+  lives = 3;
+  level = 1;
+  mrxSpeed = 18; // ticks between moves (higher = slower)
+  gameOver = false;
+  gameOverState = false;
+  gameRunning = true;
+  startTime = Date.now();
+  resetPositions();
+  updateHUD();
+  loadLeaderboard();
+  gameLoop();
+}
+
+// ══════════════════════════════════════
+// MOVEMENT
+// ══════════════════════════════════════
+function canMove(x, y, dx, dy) {
+  const nx = x + dx;
+  const ny = y + dy;
+  if (nx<0||nx>=COLS||ny<0||ny>=ROWS) return false;
+  return map[ny][nx] !== 1;
+}
+
+function wrapX(x) {
+  if (x < 0) return COLS-1;
+  if (x >= COLS) return 0;
+  return x;
+}
+
+let playerMoveTick = 0;
+const PLAYER_SPEED = 8; // ticks between moves
+
+function movePlayer() {
+  playerMoveTick++;
+  if (playerMoveTick < PLAYER_SPEED) return;
+  playerMoveTick = 0;
+
+  // try queued direction first
+  if (player.nextDx!==0||player.nextDy!==0) {
+    if (canMove(player.x,player.y,player.nextDx,player.nextDy)) {
+      player.dx=player.nextDx; player.dy=player.nextDy;
+    }
+  }
+  if (player.dx!==0||player.dy!==0) {
+    if (canMove(player.x,player.y,player.dx,player.dy)) {
+      player.x = wrapX(player.x+player.dx);
+      player.y = player.y+player.dy;
+      player.y = Math.max(0,Math.min(ROWS-1,player.y));
+    }
+  }
+
+  // eat dots
+  const cell = map[player.y][player.x];
+  if (cell===0) { map[player.y][player.x]=2; score+=10; dotsLeft--; }
+  if (cell===3) {
+    map[player.y][player.x]=2; score+=50; dotsLeft--;
+    powerMode=true; powerTimer=200;
+  }
+
+  if (dotsLeft<=0) nextLevel();
+}
+
+// MRX AI - BFS pathfinding toward player (scary!)
+function bfsPath(startX,startY,goalX,goalY) {
+  const visited = new Set();
+  const queue = [[startX,startY,[]]];
+  visited.add(`${startX},${startY}`);
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+  while (queue.length) {
+    const [cx,cy,path] = queue.shift();
+    if (cx===goalX&&cy===goalY) return path;
+    for (const [dx,dy] of dirs) {
+      const nx=cx+dx, ny=cy+dy;
+      if (nx<0||nx>=COLS||ny<0||ny>=ROWS) continue;
+      if (map[ny][nx]===1) continue;
+      const key=`${nx},${ny}`;
+      if (!visited.has(key)) {
+        visited.add(key);
+        queue.push([nx,ny,[...path,[dx,dy]]]);
+      }
+    }
+    if (queue.length > 300) break; // safety
+  }
+  return [];
+}
+
+let mrxPathCache = [];
+let mrxPathTimer = 0;
+
+function moveMRX() {
+  mrxMoveAccum++;
+  if (mrxMoveAccum < mrxSpeed) return;
+  mrxMoveAccum = 0;
+
+  // recalculate path every few moves
+  mrxPathTimer++;
+  if (mrxPathTimer >= 3 || mrxPathCache.length===0) {
+    mrxPathTimer=0;
+    if (powerMode) {
+      // run away from player
+      const awayDx = mrx.x > player.x ? 1 : -1;
+      const awayDy = mrx.y > player.y ? 1 : -1;
+      mrxPathCache = [[awayDx,0],[0,awayDy]];
+    } else {
+      mrxPathCache = bfsPath(mrx.x,mrx.y,player.x,player.y);
+    }
+  }
+
+  if (mrxPathCache.length > 0) {
+    const [dx,dy] = mrxPathCache.shift();
+    const nx=mrx.x+dx, ny=mrx.y+dy;
+    if (nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&map[ny][nx]!==1) {
+      mrxTrail.unshift({x:mrx.x,y:mrx.y,alpha:0.8});
+      if (mrxTrail.length>6) mrxTrail.pop();
+      mrx.x=nx; mrx.y=ny; mrx.dx=dx; mrx.dy=dy;
+    }
+  }
+}
+
+function nextLevel() {
+  level++;
+  mrxSpeed = Math.max(6, mrxSpeed-2);
+  initMap();
+  resetPositions();
+  showToast(`🔥 Level ${level}! MRX เร็วขึ้นแล้ว!`);
+}
+
+// ══════════════════════════════════════
+// COLLISION
+// ══════════════════════════════════════
+function checkCollision() {
+  if (mrx.x===player.x && mrx.y===player.y) {
+    if (powerMode) {
+      // player can't eat MRX, MRX still kills
+    }
+    playerDead = true;
+    deathTimer = 60;
+    lives--;
+    if (lives<=0) {
+      triggerGameOver();
+    }
+  }
+}
+
+function triggerGameOver() {
+  gameRunning = false;
+  gameOverState = true;
+  elapsed = Math.floor((Date.now()-startTime)/1000);
+  if (score > hiScore) {
+    hiScore = score;
+    localStorage.setItem('mrx_hiscore', hiScore);
+  }
+  document.getElementById('hiScoreDisplay').textContent = hiScore;
+  const overlay = document.getElementById('gameOverlay');
+  overlay.style.display = 'flex';
+  document.getElementById('overlayTitle').textContent = '💀 CAUGHT!';
+  document.getElementById('overlaySub').innerHTML =
+    `MRX ตามคุณทัน!<br>คะแนน: <strong style="color:#ffd700">${score}</strong><br>เวลารอด: <strong>${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}</strong><br><br>ใส่ชื่อในแผงซ้ายเพื่อบันทึกคะแนน`;
+  document.getElementById('startBtn').textContent = '🔄 เล่นใหม่';
+}
+
+// ══════════════════════════════════════
+// DRAW
+// ══════════════════════════════════════
+function draw() {
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+
+  // background grid glow
+  ctx.fillStyle = '#02020e';
+  ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+
+  // draw map
+  for (let r=0;r<ROWS;r++) {
+    for (let c=0;c<COLS;c++) {
+      const cell = map[r][c];
+      const x = c*CELL, y = r*CELL;
+
+      if (cell===1) {
+        // wall
+        const grad = ctx.createLinearGradient(x,y,x+CELL,y+CELL);
+        grad.addColorStop(0,'#120830');
+        grad.addColorStop(1,'#0a0520');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x,y,CELL,CELL);
+        // wall glow border
+        ctx.strokeStyle = 'rgba(80,20,160,0.6)';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(x+0.5,y+0.5,CELL-1,CELL-1);
+      } else if (cell===0) {
+        // dot
+        ctx.beginPath();
+        ctx.arc(x+CELL/2, y+CELL/2, 2.5, 0, Math.PI*2);
+        ctx.fillStyle = '#ffd700';
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      } else if (cell===3) {
+        // power pellet - pulsing
+        const pulse = 0.7 + 0.3*Math.sin(animTick*0.1);
+        ctx.beginPath();
+        ctx.arc(x+CELL/2, y+CELL/2, 6*pulse, 0, Math.PI*2);
+        ctx.fillStyle = '#ff80ff';
+        ctx.shadowColor = '#ff80ff';
+        ctx.shadowBlur = 12*pulse;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+  }
+
+  // MRX trail
+  for (let i=0;i<mrxTrail.length;i++) {
+    const t = mrxTrail[i];
+    const alpha = t.alpha * (1-i/mrxTrail.length) * 0.5;
+    ctx.font = `${CELL*0.7}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.globalAlpha = alpha;
+    ctx.fillText('💜', t.x*CELL+CELL/2, t.y*CELL+CELL/2);
+    ctx.globalAlpha = 1;
+  }
+
+  // draw MRX
+  if (!playerDead || deathTimer > 30) {
+    const mx = mrx.x*CELL+CELL/2;
+    const my = mrx.y*CELL+CELL/2;
+
+    // MRX aura
+    const auraGrad = ctx.createRadialGradient(mx,my,2,mx,my,CELL*1.2);
+    auraGrad.addColorStop(0, powerMode?'rgba(0,200,255,0.3)':'rgba(200,0,255,0.35)');
+    auraGrad.addColorStop(1,'transparent');
+    ctx.fillStyle = auraGrad;
+    ctx.beginPath();
+    ctx.arc(mx,my,CELL*1.2,0,Math.PI*2);
+    ctx.fill();
+
+    // MRX sprite
+    const mrxFrame = Math.floor(animTick/8)%MRX_FRAMES.length;
+    ctx.font = `${CELL*0.95}px serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor = powerMode ? '#30c0ff' : '#c030ff';
+    ctx.shadowBlur = 16;
+    ctx.fillText(powerMode ? '😨' : MRX_FRAMES[mrxFrame], mx, my);
+    ctx.shadowBlur=0;
+
+    // MRX "MRX" label
+    ctx.font = 'bold 8px Orbitron, sans-serif';
+    ctx.fillStyle = powerMode ? '#30c0ff' : '#ff60ff';
+    ctx.textAlign='center';
+    ctx.fillText('MRX', mx, my+CELL*0.75);
+  }
+
+  // draw player
+  const px = player.x*CELL+CELL/2;
+  const py = player.y*CELL+CELL/2;
+
+  if (playerDead) {
+    const df = Math.floor(deathTimer/10)%PLAYER_DEAD.length;
+    ctx.font = `${CELL*0.9}px serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor='#ff3060'; ctx.shadowBlur=20;
+    ctx.fillText(PLAYER_DEAD[df], px, py);
+    ctx.shadowBlur=0;
+  } else {
+    // player glow
+    const pGrad = ctx.createRadialGradient(px,py,1,px,py,CELL*0.8);
+    pGrad.addColorStop(0,'rgba(255,215,0,0.3)');
+    pGrad.addColorStop(1,'transparent');
+    ctx.fillStyle=pGrad;
+    ctx.beginPath(); ctx.arc(px,py,CELL*0.8,0,Math.PI*2); ctx.fill();
+
+    const pFrame = Math.floor(animTick/6)%2;
+    const pEmoji = pFrame===0 ? '😮' : '😶';
+    ctx.font = `${CELL*0.9}px serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor='#ffd700'; ctx.shadowBlur=10;
+    ctx.fillText(pEmoji, px, py);
+    ctx.shadowBlur=0;
+  }
+
+  // power mode overlay
+  if (powerMode) {
+    const alpha = 0.04 + 0.03*Math.sin(animTick*0.15);
+    ctx.fillStyle = `rgba(48,192,255,${alpha})`;
+    ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+  }
+
+  // HUD - score flash on eat
+  ctx.font = 'bold 13px Orbitron, sans-serif';
+  ctx.fillStyle = 'rgba(255,215,0,0.15)';
+  ctx.textAlign='right';
+  ctx.fillText(`${score}`, CANVAS_W-8, 18);
+}
+
+// ══════════════════════════════════════
+// HUD UPDATES
+// ══════════════════════════════════════
+function updateHUD() {
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('hiScoreDisplay').textContent = hiScore;
+  document.getElementById('levelDisplay').textContent = level;
+
+  const livesEl = document.getElementById('livesDisplay');
+  livesEl.innerHTML = '';
+  for (let i=0;i<lives;i++) livesEl.innerHTML += '<span>😊</span>';
+  for (let i=lives;i<3;i++) livesEl.innerHTML += '<span style="opacity:0.2">😊</span>';
+
+  // danger bar
+  const maxSpeed = 18, minSpeed = 6;
+  const danger = (maxSpeed - mrxSpeed) / (maxSpeed - minSpeed) * 100;
+  document.getElementById('dangerFill').style.width = Math.min(100,20+danger*0.8)+'%';
+
+  // MRX sprite on right panel
+  document.getElementById('mrxSprite').textContent = powerMode ? '😨' : '🦋';
+}
+
+function updateTimer() {
+  if (!gameRunning) return;
+  elapsed = Math.floor((Date.now()-startTime)/1000);
+  const m = Math.floor(elapsed/60);
+  const s = elapsed%60;
+  document.getElementById('timeDisplay').textContent = `${m}:${String(s).padStart(2,'0')}`;
+}
+
+// ══════════════════════════════════════
+// GAME LOOP
+// ══════════════════════════════════════
+function gameLoop() {
+  if (!gameRunning) return;
+
+  animTick++;
+
+  if (playerDead) {
+    deathTimer--;
+    if (deathTimer<=0) {
+      playerDead=false;
+      if (lives>0) resetPositions();
+    }
+    draw();
+    updateHUD();
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  movePlayer();
+  moveMRX();
+  checkCollision();
+
+  if (powerMode) {
+    powerTimer--;
+    if (powerTimer<=0) powerMode=false;
+  }
+
+  if (animTick%30===0) { updateTimer(); updateHUD(); }
+  draw();
+
+  if (gameRunning) requestAnimationFrame(gameLoop);
+}
+
+// ══════════════════════════════════════
+// INPUT
+// ══════════════════════════════════════
+document.addEventListener('keydown', e=>{
+  const key = e.key.toLowerCase();
+  if (key==='arrowup'||key==='w') { player.nextDx=0; player.nextDy=-1; e.preventDefault(); }
+  if (key==='arrowdown'||key==='s') { player.nextDx=0; player.nextDy=1; e.preventDefault(); }
+  if (key==='arrowleft'||key==='a') { player.nextDx=-1; player.nextDy=0; e.preventDefault(); }
+  if (key==='arrowright'||key==='d') { player.nextDx=1; player.nextDy=0; e.preventDefault(); }
+});
+
+// Touch controls
+let touchStartX=0, touchStartY=0;
+canvas && canvas.addEventListener('touchstart', e=>{
+  touchStartX=e.touches[0].clientX;
+  touchStartY=e.touches[0].clientY;
+},{passive:true});
+document.addEventListener('touchstart', e=>{
+  touchStartX=e.touches[0].clientX;
+  touchStartY=e.touches[0].clientY;
+},{passive:true});
+document.addEventListener('touchend', e=>{
+  const dx=e.changedTouches[0].clientX-touchStartX;
+  const dy=e.changedTouches[0].clientY-touchStartY;
+  if (Math.abs(dx)>Math.abs(dy)) {
+    if (dx>20) { player.nextDx=1; player.nextDy=0; }
+    else if (dx<-20) { player.nextDx=-1; player.nextDy=0; }
+  } else {
+    if (dy>20) { player.nextDx=0; player.nextDy=1; }
+    else if (dy<-20) { player.nextDx=0; player.nextDy=-1; }
+  }
+},{passive:true});
+
+// ══════════════════════════════════════
+// SUPABASE LEADERBOARD
+// ══════════════════════════════════════
+async function saveScore() {
+  const name = document.getElementById('playerName').value.trim();
+  if (!name) { showToast('⚠️ ใส่ชื่อก่อน'); return; }
+  if (score===0) { showToast('⚠️ เล่นก่อน แล้วค่อยบันทึก'); return; }
+
+  try {
+    const { error } = await db.from('mrx_scores').upsert({
+      player_name: name,
+      score: score,
+      level: level,
+      survived: elapsed||0
+    }, { onConflict: 'player_name' });
+
+    if (error) throw error;
+    showToast('✅ บันทึกคะแนนแล้ว!');
+    loadLeaderboard();
+
+    const dot = document.getElementById('statusDot');
+    dot.classList.remove('status-offline');
+    document.getElementById('statusText').textContent = 'เชื่อมต่อแล้ว';
+  } catch(e) {
+    // table might not exist, try to create score in a generic way
+    showToast('💾 คะแนน: '+score+' (local)');
+  }
+}
+
+async function loadLeaderboard() {
+  try {
+    const { data, error } = await db.from('mrx_scores')
+      .select('player_name,score,level')
+      .order('score', {ascending:false})
+      .limit(5);
+
+    const lb = document.getElementById('leaderboard');
+    if (error||!data||data.length===0) {
+      lb.innerHTML='<div style="font-size:11px;color:var(--muted);">ยังไม่มีคะแนน</div>';
+      return;
+    }
+
+    const medals=['🥇','🥈','🥉','4.','5.'];
+    lb.innerHTML = data.map((d,i)=>`
+      <div class="leaderboard-row">
+        <span>${medals[i]} ${d.player_name}</span>
+        <span>${d.score}</span>
+      </div>`).join('');
+
+    const dot = document.getElementById('statusDot');
+    dot.classList.remove('status-offline');
+    document.getElementById('statusText').textContent = 'เชื่อมต่อแล้ว';
+  } catch(e) {
+    document.getElementById('leaderboard').innerHTML='<div style="font-size:11px;color:var(--muted);">ไม่พบตาราง mrx_scores</div>';
+  }
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+function showToast(msg) {
+  const t=document.getElementById('toastMsg');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.addEventListener('load', ()=>{
+  canvas = document.getElementById('gameCanvas');
+  ctx = canvas.getContext('2d');
+  // draw static map while on overlay
+  initMap();
+  draw();
+  updateTimerDisplay_static();
+  loadLeaderboard();
+});
+
+function updateTimerDisplay_static() {
+  document.getElementById('timeDisplay').textContent='0:00';
+  document.getElementById('scoreDisplay').textContent='0';
+  document.getElementById('hiScoreDisplay').textContent=hiScore;
+}
+
+// Page transition
+document.querySelectorAll('a').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const href=a.getAttribute('href');
+    if(!href)return;
+    e.preventDefault();
+    document.body.style.opacity=0;
+    document.body.style.transition='opacity 0.2s';
+    setTimeout(()=>{ window.location.href=href; },200);
+  });
+});
+</script>
+</body>
+</html>
